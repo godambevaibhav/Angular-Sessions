@@ -1,0 +1,122 @@
+Reactive approach:
+
+Reactive: Setup:
+    ☐ Import the 'FormGroup' from @angular/forms
+    ☐ Create a property in component TS file
+        signupForm: FormGroup
+    ☐ In reactive approach, to connect our programatically created form to the HTML code, you need to remove 
+    FormsModule (used in template approach) from app.module.ts and instead you need the ReactiveFormsModule 
+    which is imported from @angular/forms
+
+Reactive: Creating a Form in Code:
+    ☐ Import FormGroup, FormControl from @angular/forms
+    ☐ ngOnInit() {
+        this.signupForm = new FormGroup({
+            'username': new FormControl(null),
+            'email': new FormControl(null),
+            ...
+        });
+    }
+    Key name should match to those defined in the HTML form. Single quotes are used to prevent this code from breaking 
+    during minification.
+
+Reactive: Syncing HTML and Form:
+    ☐ Directives: 'formGroup' and 'formControlName'.
+    ☐ <form [formGroup]="signupForm" ... >
+    Tells angular to use my form group and do not infer from anywhere else.
+    ☐ <input ... formControlName="username" ...>
+    Binds controls to the form group you created. This name should match to the control defined with same key.
+
+Reactive: Submitting the Form:
+    ☐ <form [formGroup]="signupForm" ... (ngSubmit)="onSubmit()">
+    No need of local reference to form and that won't work here.
+    ☐ onSubmit() { console.log(this.signupForm); }
+
+Reactive: Adding Validation:
+    ☐ 'required' does not work in the reactive approach.
+    ☐ Import Validators from @angular/forms
+    ☐ In your FormGroup's constructor,
+        'username': new FormControl(null, Validators.required),
+        'email': new FormControl(null, [Validators.required, Validators.email]),
+    Just pass the 'required' function as reference to the constructor.
+
+Reactive: Getting Access to Controls:
+    ☐ Output Validation Error Message
+        Don't use the local reference as in template approach.
+        <span class="help-block" *ngIf="!signupForm.get('username').valid && signupForm.get('username').touched">Please enter a valid username!</span>
+    ☐ Validate the overall Form
+    <span class="help-block" *ngIf="!signupForm.valid && signupForm.touched">Please enter valid data!</span>
+    ☐ Taking advantage of the CSS classes angular adds to controls:
+        input.ng-invalid.ng-touched { border: 1px solid red; }
+
+Reactive: Grouping Controls:
+    ☐ Nest form groups: 
+        this.signupForm = new FormGroup({
+            'userData': new FormGroup({
+                'username': new FormControl(null),
+                'email': new FormControl(null)
+            }),
+            'gender': new FormControl('male'),
+            ...
+        });
+    ☐ Need to change HTML to reflect this change.
+        ☐ Wrap the 2 controls in another div.
+            <div formGroupName="userData">
+        ☐ Change the path to the form data, to get the validations working.
+            <span class="help-block" *ngIf="!signupForm.get('userData.username').valid && signupForm.get('userData.username').touched">Please enter a valid username!</span>
+
+Reactive: Array of Form Controls:
+    ☐ Lets create a separate section in HTML.
+        <div>
+            <h4>Your Hobbies</h4>
+            <button class="btn btn-default" type="button" (click)="onAddHobby()">Add Hobby</button>
+        </div>
+    ☐ In TS code:
+        ☐ Import FormArray from @angular/forms
+        ☐ Add a new control to your form group
+            'hobbies': new FormArray([])
+            onAddHobby() {
+                const control = new FormControl(null, Validators.required);
+                (<FormArray>this.signupForm.get('hobbies')).push(control);
+            }
+        ☐ Bind the form array to HTML. In the hobbies <div>
+            ☐ Use the 'formArrayName' directive
+                <div formArrayName="hobbies">
+        ☐ Add a div below add hobby button to loop through all the controls we added to the form array.
+            <div class="form-group" *ngFor="let hobbyControl of signupForm.get('hobbies').controls; let i = index">
+                <input type="text" class="form-control" [formControlName]="i">
+            </div>
+
+Reactive: Creating Custom Validators:
+    ☐ Scenario: Validate username does not match with any of forbidden names.
+    ☐ Define array of forbidden names:
+        forbiddenUsernames = ['Chris', 'Anna'];
+    ☐ Define the validation method:
+        forbiddenNames(control: FormControl): {[s: string]: boolean} {
+            if (this.forbiddenUsernames.indexOf(control.value) !== -1) {
+                return {'nameIsForbidden': true};
+            }
+            //NOTE: ALWAYS return null if its valid; DO NOT return any object or anything else
+            return null;
+        }
+    This function should return me an object where key should be string and value should be boolean.
+    ☐ Add this new validator to the username's validator list.
+        'username': new FormControl(null, [Validators.required, this.forbiddenNames.bind(this)]),
+    
+Reactive: Setting and Patching Form Values:
+    ☐ Similar to what we did in template approach:
+        this.signupForm.setValue({
+            'userData': {
+                'username': 'Max',
+                'email': 'max@test.com'
+            },
+            'gender': 'male',
+            'hobbies': []
+        });
+        this.signupForm.patchValue({
+            'userData': {
+                'username': 'Anna',
+            }
+        });
+    ☐ Resetting the form:
+        this.signupForm.reset();

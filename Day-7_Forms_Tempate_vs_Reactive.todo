@@ -1,0 +1,91 @@
+Template approach:
+    ☐ Refer: Day-7_Forms_Tempate_vs_Reactive.PNG
+    ☐ 'FormsModule' includes lot of forms related functionality. Make sure app.module file has that entry in your imports. 
+        import { FormsModule } from '@angular/forms'
+    ☐ You need this for template driven approach to work.
+
+TD: Creating the Form and Registering Controls: 
+    ☐ To make your control available to angular, you need to do 2 things:
+        ☐ add 'ngModel' to the control (not as 2 way binding syntax)
+        ☐ add 'name' attribute to the form control
+
+TD: Submitting and Using the Form:
+    ☐ We don't add click event on Submit button because that would trigger the default Javascript submit event.
+    ☐ We override it by using another directive provided by FormsModule '(ngSubmit)' on <form> element.
+        <form (ngSubmit)="onSubmit()">
+        In TS file: onSubmit() { }
+    ☐ Get the reference to the form:
+        <form (ngSubmit)="onSubmit(f)" #f>
+        In TS file: onSubmit(form: HTMLFormElement) { }
+        This will give you the DOM representation of the form.
+    ☐ Get the value object representaion of the form:
+        <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+        In TS file: onSubmit(form: NgForm) { } (Need to import 'NgForm' from @angular/forms)
+        'form.value' represents the form's json object bound to this form.
+
+TD: Accessing the Form with @ViewChild:
+    ☐ Change the form element HTML.
+        <form (ngSubmit)="onSubmit()" #f>
+    ☐ Import 'ViewChild' from @angular/core
+    ☐ Add a variable to TS file and decorate with @ViewChild
+        @ViewChild('f') signupForm;
+        You need to pass the local reference to the decorator
+    ☐ Change onSubmit() method:
+        onSubmit() { console.log(this.signupForm); }
+
+TD: Adding Validation to check User Input:
+    ☐ required, email are some of the validators, you can add to your form controls.
+
+TD: Using the Form State:
+    ☐ Disable submit button if form is not valid. Use property binding on submit button to disable it:
+        [disabled]="!f.valid"
+    ☐ Taking advantage of the CSS classes angular adds to controls:
+        input.ng-invalid.ng-touched { border: 1px solid red; }
+
+TD: Output Validation Error Message:
+    ☐ Change the HTML form control.
+        <input ... #email="ngModel">
+        <span class="help-block" *ngIf="!email.valid && email.touched">Please enter a valid email!</span>
+    This give you access to the javascript object bound to the control.
+
+TD: Set default values:
+    ☐ Using property binding with ngModel.
+        In HTML file: [ngModel]="<name of property>"
+        In TS file: property:string = "some value";
+
+TD: Using ngModel with Two-Way-Binding:
+    ☐ Add another control to the form.
+        [(ngModel)]="answer"
+    ☐ Add 'answer' field to the TS file.
+    ☐ This also tell angular that its a control (similar to No binding) and you can find that control in your Form object. 
+
+TD: Recap of 3 Kinds of Bindings that we have seen using ngModel:
+    ☐ No binding to just tell angular that its just a control.
+    ☐ One-way-binding to give that control a default value.
+    ☐ Two-way-binding to instantly output that value and do whatever you want with that value.
+
+TD: Grouping form controls:
+    ☐ To the <div id="user-data" ngModelGroup="userData" #userData="ngModelGroup">
+        #userData="ngModelGroup" gives you access to the javascript object representation of that form group.
+    ☐ We can display a message if a form group is not valid.
+    Add this outside of the form group </div>
+        <span class="help-block" *ngIf="!userData.valid && userData.touched">User data is invalid!</span>
+
+TD: Setting and Patching Form Values (without two-way-binding):
+    ☐ Using @ViewChild signupForm; Lets change the form data on click of suggest username button.
+    You need to pass the exact copy of the form value (with all fields) as a javascript object to the setValue() method.
+        this.signupForm.setValue({ ... });
+    ☐ Disadvantage of above is that it overrites all you form values, which you may not want. 
+    ☐ So another way of doing it is using patchValue() method, which allows you to update parts of the form.
+        this.signupForm.form.patchValue({ userDate: { userName: suggestedName } });
+    Don't provide any other form value.
+
+TD: Using Form Data:
+    ☐ Create a user object with empty values.
+    ☐ Extract the form values and update the user object.
+        this.user.username = this.signupForm.value.userData.username
+    ☐ Use string interpolation {{ user.username }} to display the values on the template.
+
+TD: Resetting the Form:
+    ☐ this.signupForm.reset();
+    ☐ You can also pass the same object as in setValue() to reset() which will then reset the form to specific values.

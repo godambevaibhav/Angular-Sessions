@@ -1,0 +1,123 @@
+What happens when you visit localhost:4200:
+    ☐ CLI creates a root component for us.
+    ☐ 'index.html' is served by the server.
+    ☐ <app-root> is not a default html element. This root component ties together our whole application.
+    ☐ 'app.component.ts' -> Contains a class with @Component decorator. -> @Component has an important attribute 'selector' 
+    which takes a string.
+    ☐ Angular finds this selector -> finds the component for this selector -> replaces this selector with the template
+    of the component.
+    ☐ How Angular is loaded? 'ng serve' rebuilds our index.html files and add the right JS imports to it. That code first runs 
+    what we we write in the 'main.ts' file.
+    ☐ 'main.ts' loads the AppModule -> In the 'AppModule', you see this is decorated by @NgModule which has a 'bootstrap' array,
+    that contains the root component 'AppComponent'.
+    ☐ Now Angular knows AppComponent is the root component and from its component's selector, replace the html template in the 
+    'index.html'.
+
+Create component manually:
+    ☐ Create a new folder under 'app'
+    ☐ Create a new ts and html file (Naming convention: <component_name>.component.ts, <component_name>.component.html)
+    ☐ TS file -> add a new class and decorate with @Component -> pass an object with 'selector' and 'templateUrl' fields 
+    (Note: need to import 'Component')
+        ☐ Naming convention for 'selector' app-<component_name>.
+    ☐ HTML file -> add the page elements
+
+Create component using CLI:
+    ☐ Use: ng g c <component_name>
+    where g - generate, c - component
+    ☐ Automatically creates ts, html, css and spec files and updates the 'app.module.ts'
+
+Using the component:
+    ☐ 'app.module.ts' -> import the new component and add the component class to the 'declarations' array of '@NgModule' decorator 
+    ☐ 'app.component.html' -> add the selector for the new component.
+    ☐ You can create nested components.
+
+Component Templates:
+    ☐ @Component -> templateUrl or template (use external or inline templates)
+        ☐ multiline html expressions with inline templates -> use ``
+    ☐ styleUrls or styles -> both takes array
+        ☐ styles: [``] -> for inline css
+
+Selectors:
+    ☐ Needs to be unique across the app
+    ☐ Alternative ways of defining selectors:
+        ☐ element selector -> selector: 'app-selector' -> <app-selector></app-selector>
+        ☐ attribute selector -> selector: '[app-selector]' -> <div app-selector></div>
+        ☐ class selector -> selector: '.app-selector' -> <div class='app-selector'></div>
+    ☐ We mostly use element selector for the components.
+
+Data Binding:
+    ☐ Refer "Day-2_Data_Binding.jpg"
+
+String Interpolation:
+    ☐ {{ variable.name }} or {{ function() }}
+
+Property Binding:
+    ☐ <button class="btn btn-primary" disabled>Add server</button> or 
+    <button class="btn btn-primary" [disabled]="!allowNewServer">Add server</button>
+    ☐ <p> {{ allowNewServer }} </p> or <p [innerText]="allowNewServer"></p>
+    ☐ Note: Cannot combine String interpolation within property binding, that would cause errors.
+
+Event Binding:
+    ☐ <button class="btn btn-primary" (click)="onCreateServer()">Add server</button>
+
+Passing and using data with Event Binding:
+    ☐ <input type="text" class="form-control" (input)="onUpdateServerName($event)">
+    ☐ In TS ->
+        onUpdateServerName(event: Event) {
+            this.serverName = (<HTMLInputElement>event.target).value;
+        }
+
+2-Way Data Binding:
+    ☐ Important: For Two-Way-Binding to work, you need to enable the ngModel directive. 
+    This is done by adding the 'FormsModule'  to the imports[]  array in the AppModule.
+    ☐ You then also need to add the import from @angular/forms in the 'app.module.ts' file:
+    import { FormsModule } from '@angular/forms';
+    ☐ [(ngModel)]="modelName"
+
+Assignment:
+    ☐ Add a input field which updates a property ('username') via 2-way binding.
+    ☐ Output the username property via string interpolation (in a paragraph below the input).
+    ☐ Add a button which may only be clicked if the username is NOT an empty string.
+    ☐ Upon clicking the button, the username should be set to an empty string.
+
+Directives:
+    ☐ Refer: "Day-2_Directives.jpg"
+    ☐ Structural directive (add or remove elements from DOM) -> ngIf ... else
+    <p *ngIf="serverCreated; else noServer">...</p>
+    <ng-template #noServer>
+        <p>...</p>
+    </ng-template>
+    where, '#noServer' -> used to mark certain section of the template, that we want to show conditionally.
+    ☐ Attribute directive (don't add or remove elements. Only change the elements they were placed on) -> 
+    <p [ngStyle]="{backgroundColor: getColor()}"></p>
+    <p [ngStyle]="{backgroundColor: 'red'}"></p>
+    <p [ngStyle]="{backgroundColor: <boolean> ? 'red' : 'yellow'}"></p>
+    where, [] is not part of the directive, but indicates that we want to bind some property on this directive.
+    Here, 'ngStyle' happens to be property of the directive.
+    ☐ Applying CSS classes dynamically with ngClass
+    <p [ngClass]="{online: <boolean_expression>}"></p>
+    where, 'online' is a css class defined in css file.
+    ☐ Outputting Lists with ngFor -> its a structural directive
+    <app-server *ngFor="let server of servers; let i = index"></app-server>
+
+Assignment:
+    ☐ Add a button that says 'Display Details'
+    ☐ Add a paragraph with any content of your choice
+    ☐ Toggle the displaying of that paragraph with the button created in first step
+    ☐ Log all button clicks in an array and output that array below the secret paragraph (may be log a timestamp or simply 
+    an incrementing number)
+    ☐ Starting at the 5th log item, give all future items a blue background (via ngStyle) and white foreground color (ngClass)
+
+Debugging Angular Apps:
+    ☐ SourceMaps: One of the easiest performance wins you can gain for your website is to combine and compress your 
+    JavaScript and CSS files. But what happens when you need to debug the code within those compressed files? 
+    A source map consists of a whole bunch of information that can be used to map the code within a compressed file 
+    back to it’s original source. 
+        ☐ Angular CLI generates source maps for you automatically in Development mode.
+        ☐ UglifyJS is a popular command line utility that allows you to combine and compress JavaScript files and generate 
+        source maps
+    ☐ Angular Augury - https://augury.angular.io/
+        ☐ Google Chrome Developer Tool extension for debugging and profiling Angular 2 applications.
+
+References:
+    ☐ 'EMMET' plugin for HTML files

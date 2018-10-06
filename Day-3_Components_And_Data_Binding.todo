@@ -1,0 +1,85 @@
+Overview:
+    ☐ Refer: Property_Event_Binding.jpg
+
+Binding to custom properties:
+    ☐ Passing data from parent to child component.
+    ☐ Parent HTML -> <child-component *ngFor="let parentElement of parentElements">
+    ☐ Child TS -> @Input() childPropertyName: {field: type, ...}
+        ☐ Add 'Input' to imports from @angular/core
+    ☐ Binding -> <child-component *ngFor="let parentElement of parentElements" [childPropertyName]="parentElement">
+    ☐ Alias -> [bookItem]="parentElement" and @Input('bookItem') childPropertyName: {field: type, ...}
+
+Binding to custom events:
+    ☐ Emit data from child to parent component.
+    ☐ Child TS -> @Output() customEvent = new EventEmitter<{field: type, ...}>()
+        ☐ Add 'Output' & 'EventEmitter' to imports from @angular/core
+    ☐ Parent HTML -> <child-component (customEvent)="onCustomEvent()"> 
+    ☐ Parent TS -> onCustomEvent(fromChild: {field: type, ...}) {}
+    ☐ Emitting -> this.customEvent.emit({field: this.value, ...});
+    ☐ Alias -> @Output('someEvent') customEvent = new EventEmitter<{field: type, ...}>() and <child-component (someEvent)="onCustomEvent()"> 
+
+Issue with Custom property binding and event binding:
+    ☐ Now one issue with that approach is that if you want to talk between two components sitting next to each other it can get kind 
+    of complicated to emit a event in one component change something in the parent component and then pass this new data down to the 
+    child component. And these chains of inputs and outputs can really grow more complex. There are some use cases where the distance 
+    between two components that should talk to each other is so great that building a chain of outputs and inputs is not very practical.
+    That is why in the services section we will see another approach of having components talk to each other, though thats not the better 
+    approach, it is just a better tool for a specific use case.
+
+CSS:
+    ☐ A CSS defined on the root component should actually get applied to child components. This is the default browser behaviour.
+    ☐ But in case of angular this is not so. This actually is a behavior enforced by angular which is not the default behavior of 
+    the browser. Angler gives us this behavior and it's a great behavior because we can make sure that whichever styles we define 
+    in component's CSS file will only get applied to the component they belong to.
+
+Local References in Templates:
+    ☐ We may not need to use two way data binding since we only want you save at the point of time I click the button.
+    The option we would have is to place a local reference on that element. A local reference can be placed on any HTML element.
+    And you add with a hash tag and then a name of your choice.
+    ☐ In HTML -> <input type="text" #refName> -> This gives the html element itself
+    <button (click)="onClick(refName)"></button>
+    ☐ In TS -> onClick(input: HTMLInputElement) {
+        console.log(input.value);
+    }
+
+Getting Reference to the Template & DOM with @ViewChild:
+    ☐ Right now we're passing the reference here when we call a method and that works fine.
+    But sometimes you want to get access before we call the method. And there is a nice decorator we can use in typescript 
+    to get this access.
+    ☐ In HTML -> <input type="text" #contentInput>
+    ☐ In TS -> @ViewChild('contentInput') contentInput: ElementRef;
+        ☐ Import ViewChild, ElementRef from angular/core.
+        ☐ The value in the parenthesis is a selector, how you want to select the component.
+            ☐ Pass the name of a local reference like -> 'contentInput'
+            ☐ Pass the name of a component -> ComponentName without quotes
+        ☐ console.log(this.contentInput.nativeElement.value);
+        ☐ You should not never change the value of native element using assignment, you can do that but its not recommended.
+            this.contentInput.nativeElement.value = 'some value';
+
+Projecting Content into Components with 'ng-content':
+    ☐ Everything you place between the opening and closing tag of your own component is lost by default and is
+    simply removed from the DOM, angular will not take care about it.
+    ☐ But you can change this. There is a special directive and it is a directive even though it looks like a component but
+    it doesn't have its own template.
+    ☐ A special directive you can add in your components template in the place where you want to render the content, you can 
+    add 'ng-content' opening and closing again.
+    ☐ It still is a directive just using this element like selector and this serves as a hook you can place in your component 
+    to mark the place for angular where it should add any content it finds between the opening and closing tag here.
+
+Component Lifecycle:
+    ☐ Refer - Day-3_Component_Life_Cycle.JPG
+    ☐ constructor() -> ngOnChanges(changes: SimpleChanges) -> ngOnInit() -> 
+        ☐ Need to import OnInit, OnChanges from angular/core
+    ☐ ngOnChanges -> is the only hook which takes an argument
+        ☐ SimpleChanges is an object that has an element (property bound with @Input) -> currentValue & previousValue
+    ☐ ngOnInit vs ngAfterViewInit() -> So that is the difference between well the points of time where these  hook's run. 
+    After view init, gives you access to the template elements. You can then access them and use their values and so on.
+    Before that hook has been reached. You can't do that. You can't check the value of some element in your DOM because it 
+    hasn't been rendered yet.
+    
+Getting Access to ng-content with @ContentChild:
+    ☐ In parent HTML -> add the local reference to the content that would be displayed in the child component.
+    ☐ In child TS -> We don't need @ViewChild but we need  @ContentChild, which also needs to be imported.
+    @ContentChild('contentInput') contentInput: ElementRef;
+    ☐ Just like we can't access template data before ngAfterViewInit() is ran, similary we can't access the content 
+    unless we reach ngAfterContentInit()

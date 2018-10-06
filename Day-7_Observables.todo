@@ -1,0 +1,7 @@
+Observables:
+    ☐ npm install --save rxjs-compat
+    ☐ Refer: Day-7_Observables.PNG
+    ☐ Creating simple observable using Observable.interval()
+    ☐ Creating custom observable using Observable.create()
+    ☐ Unsubscribing from custom observables
+    ☐ Using 'Subject' instead of EventEmitter to pass and listen to Data

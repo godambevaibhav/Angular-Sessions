@@ -1,0 +1,53 @@
+Creating a Service:
+    ☐ Create a new file <service_name>.service.ts in the app folder
+    export class NameOfService {}
+    ☐ No decorators
+    ☐ Informing angular to inject the dependency as a service
+        ☐ Import the service class
+        import { NameOfService } from 'path/to/service'
+        ☐ Define a constructor in the component where you want to use the service
+        constructor( private varService : NameOfService ) { }
+        ☐ Provide a service -> How angular would create the service
+            ☐ Add 'providers' property to @Component and provide the service class name in the providers array.
+            providers: [NameOfService] 
+    ☐ Using the service
+    this.varService.callServiceMethod(...);
+
+Hierarchical Injector:
+    ☐ Refer: Day-5_Services_Hierarchical_injector.JPG
+    ☐ Responsible to provide the instance of the service to our component.
+    ☐ By defining service in 'providers' array, results in creating a new instance of the service and this instance is available 
+    to all child and sub-child components.
+    ☐ Re-defining the service in 'providers' array of any of the childs, results in creating a new instance of the service 
+    which overrides the parent service instance. Its a new instance all together.
+
+Injecting services into services:
+    ☐ Services don't have any decorator's, so don't have a way to associate any metadata.
+    ☐ Angular provides a decorator @Injectable (need to import form @angular/core)
+    ☐ module.ts file -> Add the to be injected service to the providers array.
+    This would create the instance of the service and ready to be injected. 
+    ☐ Add @Injectable decorator to the service receiving the other service (receiving end) or where you are injecting the service.
+        ☐ @Injectable() export class ItemsService {
+            constructor( private loggingService : LoggingService ) { }
+        }
+        ☐ Import Injectable and LoggingService as well.
+    ☐ Leave the service to be injected as is, no decorators needed on it.
+
+Using Services for Cross-component Communication:
+    ☐ Saves you lot of code by removing the need of custom property and custom event binding to exchange data between components.
+    ☐ Do Cross-component Communication through a service using EventEmitter.
+    ☐ In ItemService -> Define property -> itemRemoved = new EventEmitter<number>();
+    ☐ In Item-Card component -> change itemRemoved() -> emit event -> this.loggingService.itemRemoved.emit(id);
+    ☐ In Item-Add component -> change constructor() -> this.loggingService.itemRemoved.subscribe(
+        (id: number) => alert('removed item: ' + id)
+    );
+
+Assignment:
+    ☐ Manage Active and Inactive Users
+    ☐ Create a service to centralize and manage these users
+    ☐ Have 2 components -> 1. Active users 2. Inactive users and display respective list of users
+    ☐ Each active user has a button that says 'Inactive User' and when you click, that user moves to Inactive user list and 
+    UI should reflect that change.
+    ☐ Each Inactive user has a button that says 'Active User' and when you click, that user moves to active user list and 
+    UI should reflect that change.
+    ☐ Create a counter service to determine how often we do Active to Inactive & vice-versa operations and log them to console.

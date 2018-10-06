@@ -1,0 +1,136 @@
+Setting up and Loading Routes:
+    ☐ module.ts -> Import 'Routes' from @angular/router
+    ☐ module.ts -> const appRoutes: Routes = [
+        { path: '', component: <HOME_COMPONENT> }
+        { path: 'mypath', component: <COMPONENT_NAME> }, //navigates to -> localhost:4200/mypath
+    ]
+    ☐ Register routes in our app:
+        ☐ module.ts -> Import 'RouterModule' from @angular/router
+        ☐ module.ts -> Add 'RouterModule' imports section of @NgModule
+        imports: [
+            ...,
+            RouterModule.forRoot(appRoutes)
+        ]
+    ☐ Mark the place in our document where we want the angular router to load the component of the currently selected route.
+        ☐ Use 'router-outlet' directive in app.component.html
+        <router-outlet></router-outlet>
+
+Navigation with Router Links:
+    ☐ href -> reloads the app on every click of hyperlink
+    <li><a href="/"></a></li>
+    <li><a href="/mypath"></a></li>
+        ☐ Tab is not updated as well (currently active tab).
+    ☐ 'routerLink' directive -> prevents the app from being reloaded
+    <li><a routerLink="/"></a></li>
+    <li><a routerLink="/mypath"></a></li>
+    <li><a [routerLink]="['/mypath',...]"></a></li>
+        ☐ Tab is yet not updated (currently active tab).
+    ☐ 'routerLinkActive' directive
+    <li routerLinkActive="active"><a routerLink="/"></a></li>
+    <li routerLinkActive="active"><a routerLink="/mypath"></a></li>
+        ☐ By doing this you make all your routes as active
+        ☐ Home tab would still be always selected
+    ☐ 'routerLinkActiveOptions' directive
+    <li routerLinkActive="active" routerLinkActiveOptions="{exact: true}"><a routerLink="/"></a></li>
+    <li routerLinkActive="active"><a routerLink="/mypath"></a></li>
+
+Navigating programatically:
+    ☐ HomeComponent -> 
+        ☐ Need to access the registered routers
+            ☐ constructor(private router : Router)
+            Add import 'Router' from @angular/router 
+        ☐ Add a button to html and bind with (click) event
+        ☐ Add a listener in TS file -> navigate to one of the defined routes
+        this.router.navigate(['/mypath']);
+        ☐ By default, navigate method defaults to root url '/' and so '/' before the path is not important. Below code works the same:
+        this.router.navigate(['mypath']);
+        ☐ Changing the relative path using 'ActivatedRoute'
+            ☐ Add ActivatedRoute to the constructor(), add import from @angular/router
+            constructor(private router : Router, private route : ActivatedRoute)
+            ☐ In your listener code:
+            this.router.navigate(['mypath'], {relativeTo: this.route});
+            Now, your url will change to '/mypath/mypath' instead of '/mypath'
+
+Passing parameters to Route:
+    ☐ module.ts -> const appRoutes: Routes = [
+        { path: '', component: <HOME_COMPONENT> }
+        { path: 'mypath', component: <COMPONENT_NAME> }, //navigates to -> localhost:4200/mypath
+        { path: 'path/to/item', component: <COMPONENT_ITEM> }
+        { path: 'path/to/item/:itemId', component: <COMPONENT_ITEM> }
+    ]
+    ☐ 'itemId' prefixed with ':' becomes a parameter for this route and now you can access this route by:
+        locahost:4200/path/to/item/1
+    ☐ Fetching Router Parameters:
+        ☐ In the COMPONENT_ITEM TS file, add ActivatedRoute to the constructor().
+        ☐ Fetch the id value from url -> In ngOnInit(), add this line:
+        this.item.id = this.route.snapshot.params['id'];
+        ☐ In HTML file, use string interpolation get the values. 
+        locahost:4200/path/to/item/1
+        Should display item with id 1.
+    ☐ Re-loading route scenario -> What if you are reloading the route from with in the route, not from outside?
+        ☐ Lets say we have a route as: { path: 'path/to/item/:itemId/:itemName', component: <COMPONENT_ITEM> }
+        Add below link to the same COMPONENT_ITEM html
+        <a [routerLink]="['/path/to/item', 10, 'Mobiles']">Load Item 10</a>
+        This is a dynamic way of building route link
+        ☐ locahost:4200/path/to/item/1/Wallets
+        Click the link now
+        URL would change to locahost:4200/path/to/item/10/Mobiles, but data is not reflected in html template
+        Reason is because Angular does not re-instantiate the component if you are stil on the same route.
+        ☐ In order to get this reflected correctly, you need to use an observable: this.route.params
+        This observable is triggered when you change your route parameters from within the route.
+        So in ngOnInit() you also need to add below code:
+        ngOnInit() {
+            this.item = {
+                id: this.route.snapshot.params['itemId'],
+                name: this.route.snapshot.params['itemName']
+            };
+
+            this.route.params
+                .subscribe(
+                    (params: Params) => {
+                        this.item.id = params['itemId'];
+                        this.item.name = params['itemName'];
+                    }
+                );
+        }
+        Import Params from @angular/router
+        Use this approach ONLY IF you are sure that you may need to reload the same route from within the route.
+        Otherwise, you don't need this observable. 
+    ☐ Route Observables: These are destroyed for you by angular when you leave the component by navigating away to different route.
+    So you don't have to manually unsubscribe from it.
+    But it does not do anything wrong if you do. Below is how we unsubscribe:
+        ☐ Import 'Subscription' from 'rxjs/Subscription' and define in your component
+        mySubscription: Subscription;
+        ☐ Get the reference to the subscription
+        this.mySubscription = this.route.params
+                .subscribe(
+                    (params: Params) => {
+                        this.item.id = params['itemId'];
+                        this.item.name = params['itemName'];
+                    }
+                );
+        ☐ Add 'OnDestroy' lifecycle hook to your component
+        ☐ Implement 'ngOnDestroy()' method:
+        this.mySubscription.unsubscribe();
+        ☐ Note that if you are imlementing your own observables, then you need to unsubscribe manually as we did above.
+
+Passing Query Parameters and Fragments:
+    ☐ Example: locahost:4200/path/to/item/10/Mobiles?mode=editing#loading
+    ☐ On the list of items, add the router links:
+    <a ... [routerLink]="['/path/to/item', 5, 'edit']"
+        [queryParams]="{allowEdit : '1'}" 
+        [fragment]="'loading'"
+        *ngfor=...></a>
+    route = locahost:4200/path/to/item/5/edit?allowEdits=1
+    ☐ Doing this programatically:
+    this.router.navigate(['/path/to/item', itemId, ''edit], {queryParams: {allowEdit: '1'}, fragment: 'loading' });
+
+Retrieving Query Parameters and Fragments:
+    ☐ In your routes component TS file, add ActivatedRoute to the constructor(), add import from @angular/router
+    ☐ ngOnInit()
+        console.log(this.route.snapshot.queryParams);
+        console.log(this.route.snapshot.fragment);
+        We also have observables for these, if you want to use those just as below:
+            this.route.queryParams.subscribe();
+            this.route.fragment.subscribe();
+

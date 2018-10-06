@@ -1,0 +1,114 @@
+Creating a Attribute Directive:
+    ☐ Create a new folder in app - first-basic
+    ☐ Create a TS file inside it - first-basic.directive.ts
+    ☐ Create a class and decorate with @Directive (needs to be imported from angular/core)
+        import { Directive, ElementRef, OnInit } from '@angular/core';
+
+        @Directive({
+            selector: '[appFirstBasic]'
+        })
+        export class FirstBasic implements OnInit {
+            constructor(private elementRef: ElementRef) {
+            }
+
+            ngOnInit() {
+                this.elementRef.nativeElement.style.backgroundColor = 'green';
+            }
+        }
+    ☐ We can inject the element the directive sits on into this class and angular gives us that ability.
+    You add the element that you need angular to inject for us, as the constructor argument
+    ☐ Just like the component, directive also has OnInit and this is the ONLY lifecycle hook direvives can use.
+    It has OnDestroy though.
+    ☐ Directives don't have a view / template and we can't add.
+    ☐ app.module.ts changes - Add this directive class to imports and declarations section of NgModule
+    ☐ 'selector' in square brackets means its a attribute style directive and it would be used as below:
+    <p appFirstBasic>Style me with first directive!</p>
+    ☐ You can also create a directive with CLI -> ng g d <directive-name>
+    
+Better way of styling the element using Renderer:
+    ☐ You should use the Renderer for any DOM manipulations.
+    ☐ constructor(private elRef: ElementRef, private renderer: Renderer2) { }
+    ☐ ngOnInit() {
+        this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'blue');
+      }
+    ☐ You need to import Renderer2 from angular/core
+
+Using HostListener to listen to Host Events:
+    ☐ HostListener is used to listen on events the directive sits on.
+    ☐ 'mouseenter' and 'mouseleave'
+    ☐ Usage:
+    @HostListener('mouseenter') 
+    onMouseEnter(eventData: Event) {
+        this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'blue');
+    }
+    @HostListener('mouseleave') 
+    onMouseEnter(eventData: Event) {
+        this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'transparent');
+    }
+
+Using HostBinding to Bind to Host Properties:
+    ☐ Replacing Renderer with HostBinding, though using Renderer is not wrong here
+    ☐ You can bind to any property the directive is sitting on.
+    @HostBinding('style.backgroundColor') backgroundColor: string = 'transparent';
+    @HostListener('mouseenter') 
+    onMouseEnter(eventData: Event) {
+        //this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'blue');
+        this.backgroundColor = 'blue';
+    }
+    @HostListener('mouseleave') 
+    onMouseEnter(eventData: Event) {
+        //this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'transparent');
+        this.backgroundColor = 'transparent';
+    }
+
+Binding to Directive Properties:
+    ☐ Using custom property binding.
+    @Input() defaultColor: string = 'transparent';
+    @Input() highlightColor: string = 'blue';
+    @HostBinding('style.backgroundColor') backgroundColor: string;
+
+    ngOnInit() {
+        this.backgroundColor = this.defaultColor;
+        //this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'blue');
+    }
+
+    @HostListener('mouseenter') 
+    onMouseEnter(eventData: Event) {
+        //this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'blue');
+        //this.backgroundColor = 'blue';
+        this.backgroundColor = this.highlightColor;
+    }
+    @HostListener('mouseleave') 
+    onMouseEnter(eventData: Event) {
+        //this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'transparent');
+        //this.backgroundColor = 'transparent';
+        this.backgroundColor = this.defaultColor;
+    }
+
+    <p appFirstBasic [defaultColor]="'yellow'" [highlightColor]="'red'">Style me with first directive!</p>
+
+    ☐ Binding to a single property of a directive, using the directive selector for property binding.
+    @Input('appFirstBasic') highlightColor: string = 'blue';
+
+    <p [appFirstBasic]="'red'" [defaultColor]="'yellow'">Style me with first directive!</p>
+
+Structural Directives:
+    ☐ Identified with a '*' before the name.
+    ☐ Need to import TemplateRef, ViewContainerRef from '@angular/core'
+    ☐ The selector name should match the custom property
+
+    @Directive({
+        selector: '[appUnless]'
+    })
+    export class UnlessDirective {
+        //name of property should be same as that of selector
+        @Input() set appUnless(condition: boolean) {
+            if (!condition) {
+                this.vcRef.createEmbeddedView(this.templateRef);
+            } else {
+                this.vcRef.clear();
+            }
+        }
+
+        constructor(private templateRef: TemplateRef<any>, private vcRef: ViewContainerRef) { }
+    }
