@@ -7,7 +7,7 @@ What happens when you visit localhost:4200:
     ☐ Angular finds this selector -> finds the component for this selector -> replaces this selector with the template
     of the component.
     ☐ How Angular is loaded? 'ng serve' rebuilds our index.html files and add the right JS imports to it. That code first runs 
-    what we we write in the 'main.ts' file.
+    what we write in the 'main.ts' file.
     ☐ 'main.ts' loads the AppModule -> In the 'AppModule', you see this is decorated by @NgModule which has a 'bootstrap' array,
     that contains the root component 'AppComponent'.
     ☐ Now Angular knows AppComponent is the root component and from its component's selector, replace the html template in the 
