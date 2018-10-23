@@ -5,3 +5,12 @@ Observables:
     ☐ Creating custom observable using Observable.create()
     ☐ Unsubscribing from custom observables
     ☐ Using 'Subject' instead of EventEmitter to pass and listen to Data
+    
+    rxjs --- Version 6
+     ☐ npm install --save rxjs-compact
+     ☐ Ensure backward compatibility
+     ☐ Old code not need to be changed 
+     ☐ Import statement changed in version 6
+         ☐ import { Observable } from 'rxjs';
+         ☐ import { map } from 'rxjs/operators'
+         ☐ import {fromPromise} from 'rxjs/'
